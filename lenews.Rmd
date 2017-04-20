@@ -1,0 +1,41 @@
+---
+title: "LeNews"
+output: html_notebook
+---
+
+
+```{r}
+library(jsonlite)
+my.df <- data.frame(
+  id=character(0),
+  upload_date=character(0),
+  like_count=numeric(0),
+  dislike_count=numeric(0),
+  duration=numeric(0),
+  view_count=numeric(0),
+  fulltitle=character(0),
+  desription=character(0),
+  tags = character(0)
+  )
+f <- list.files("data", pattern = "json$", full.names = TRUE)
+for(j in f) {
+  d <- fromJSON(j, flatten = TRUE)
+  # message("Retrieving video file ", j)
+  my.df <- rbind(
+    my.df, 
+    data.frame(
+      id=d$id, 
+      upload_date=d$upload_date, 
+      like_count=d$like_count,
+      dislike_count=d$dislike_count,
+      view_count=d$view_count, 
+      duration=d$duration, 
+      fulltitle=d$fulltitle,
+      description=d$description,
+      tags=paste(d$tags, collapse = ', ')
+      )
+    )
+}
+write.csv(my.df, "lenews.csv")
+write.table(my.df, "lenews.table")
+```
