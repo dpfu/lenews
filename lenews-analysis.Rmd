@@ -3,29 +3,46 @@ title: "LeNews Analsiys"
 output: html_notebook
 ---
 
-This is an analysis of LeFloid News date
+This is an analysis of LeFloid News data
 
 ```{r}
 mydata <- read.csv("lenews.csv")
 mydata
 ```
 
-# Welche Quellen werden angegeben?
+# Quellentransparenz
 
-Quellentransparenz.
+Welche Quellen werden angegeben? Mit einer sehr simplen regulären Ausdruck lassen sich die URLs aus dem Description-Text extrahieren.
 
 ```{r}
+#library(tidyr)
+#library(dplyr)
+
 pattern <- "(http[^[:space:]]+)"
-m <- gregexpr(pattern, mydata$description[1])
-urls <- regmatches(mydata$description[1], m)
-str(urls[1])
-#grep(regex_url, mydata$description[1], value = TRUE)
+m <- gregexpr(pattern, mydata$description)
+urls <- regmatches(mydata$description, m)
+
+#count_urls <- lapply(urls,length)
+
+unique_urls <- unique(unlist(urls))
+
+URL_parts <- function(x) {
+    m <- regexec("^(([^:]+)://)?([^:/]+)(:([0-9]+))?(/.*)", x)
+    parts <- do.call(rbind,
+                     lapply(regmatches(x, m), `[`, c(3L, 4L, 6L, 7L)))
+    colnames(parts) <- c("protocol","host","port","path")
+    parts
+}
+
+URL_parts(unique_urls)
 
 ```
 
 
+
 ```{r}
 library(ggplot2)
+
 ggplot(data = mydata) + 
   geom_point(mapping = aes(x = id, y = duration)) +
   labs(title = "Like_count vs. lenght") + 
